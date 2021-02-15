@@ -1,0 +1,15 @@
+{
+	"scoreboard_name":"money",
+	"form_title":"称号系统",
+	"form_Dropdown":"选择操作称号",
+	"form_Toggle":"打开为购买，关闭为穿戴",
+	"command_describe":"打开称号面板",
+	"command_help":"'§e---------§b[§r帮助§b]§e---------\n§2/faith §e- §b称号购买面板\n§2/faith list §e- §b查看已有称号\n§2/faith view §e- §b查看当前使用的称号\n'",
+	"command_view":"§2你正在使用的称号为:",
+	"command_list":"个人称号查看",
+	"nick_change":"§2称号切换成功！当前称号:",
+	"nick_donot_have":"§4你还没有这个称号！",
+	"nick_buy_success":"§2称号购买成功！",
+	"nick_already_have":"§4你已经有这个称号了！",
+	"money_donot_enough":"§4你钱不够！至少需要%money%金币"
+}

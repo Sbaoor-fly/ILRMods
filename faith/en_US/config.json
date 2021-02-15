@@ -1,0 +1,15 @@
+{
+	"scoreboard_name":"money",
+	"form_title":"title system",
+	"form_Dropdown":"Select Operation Title",
+	"form_Toggle": "Open for purchase, close for wear",
+	"command_describe":"Open title panel",
+	"command_help":"'§e---------§b[§rHelp§b]§e---------\n§2/faith §e- §b Title purchase Panel\n§2/faith list §e- §bView existing titles\n§2/faith view §e- §bView current titles\n'",
+	"command_view":"§2The title you are using is:",
+	"command_list":"Personal Title View",
+	"nick_change":"§2The title switch successfully! Current title:",
+	"nick_donot_have":"§4You do not have this title yet!",
+	"nick_buy_success":"§2 The title purchase was successful!",
+	"nick_already_have":"§4You already have this title!",
+	"money_donot_enough": "§4 You don’t have enough money! You need at least %money% gold coins"
+} 
