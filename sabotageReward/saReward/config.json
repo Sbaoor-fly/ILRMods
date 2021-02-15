@@ -1,0 +1,16 @@
+{
+  "data": {
+    "multiple": {
+      "desBlock": 1,
+      "killMob": 1
+    },
+    "scoreboard": {
+      "desBlock": "breakblock",
+      "killMob": "killmobs"
+    }
+  },
+  "config": {
+    "allow_animal": true,
+    "probability": 0.5
+  }
+}
