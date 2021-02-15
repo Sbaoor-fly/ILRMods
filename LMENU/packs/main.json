@@ -1,0 +1,53 @@
+﻿{
+    "title":"§2DreamPure菜单",
+    "content":"来点什么？：",
+     "buttons": [
+		{
+            "text": "点我获得钟",    
+            "cmd": [    
+                {
+                    "command": "give @s clock", 
+                    "type": "cmd"    
+                }
+                ]
+        },
+        {
+            "text": "花费100金币自杀",    
+            "cmd": [    
+                {
+                    "command": "kill @s", 
+                    "type": "moneycmd",
+					"money":100
+                }
+                ]
+        },
+        {
+            "text": "OP菜单",
+            "cmd": [
+                {
+                    "command": "op",
+                    "type": "opform"
+                }
+            ]
+        },
+        {
+            "text": "商店",
+            "cmd": [
+                {
+                    "command": "/shop",
+                    "type": "default"
+                }
+            ]
+        },
+        {
+            "text": "打开xxx子菜单",
+            "cmd": [
+                {
+                    "command": "xxx",
+                    "type": "form"
+                }
+            ]
+        }
+    ]
+}
+        
