@@ -1,0 +1,6 @@
+{
+	"type":"simple",
+	"title":"测试表单",
+	"context":"测试用的",
+	"list":$1
+}
