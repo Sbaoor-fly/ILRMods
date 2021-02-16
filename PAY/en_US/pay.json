@@ -1,0 +1,9 @@
+{
+     "scoreboard_name":"money",
+     "money_not_enough":"You don't seem to have enough money",
+     "input_not_number":"The input format is wrong",
+     "pay_success":["Successfully transferred {money} gold coins to {player}","{player} transferred {money} gold coins to you"],
+     "form_title":"Transfer Panel",
+     "form_input":["Please fill in the amount","write it here"],
+     "form_dropdown": "Select a transfer object"
+} 

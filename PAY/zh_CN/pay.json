@@ -1,0 +1,9 @@
+{
+    "scoreboard_name":"money",
+    "money_not_enough":"你的钱似乎不太够",
+    "input_not_number":"输入的格式有误",
+    "pay_success":["成功向{player}转账{money}金币","{player}向你转账了{money}金币"],
+    "form_title":"转账面板",
+    "form_input":["请填写金额","写在这里哦"],
+    "form_dropdown":"选择一个转账对象"
+}
