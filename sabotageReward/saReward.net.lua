@@ -4,7 +4,7 @@
 -------- STAND WITH OPEN SOURCE --------
 ----------------------------------------
 -- 插件版本，请勿修改
-plugin_version = '1.0.4'
+local plugin_version = '1.0.5'
 -- 载入库
 if (tool:IfFile('./ilua/lib/json.lua') == false) then
     print('[saReward] Where is my json library??!!')
@@ -16,15 +16,15 @@ if (tool:IfFile('./ilua/saReward/config.json') == false) then
     print('[saReward] Where is my config file??!!]')
     return false
 end
-cfg = json.decode(tool:ReadAllText('./ilua/saReward/config.json'))
-mu_desBlock = cfg.data.multiple.desBlock
-mu_killMob = cfg.data.multiple.killMob
-sb_desBlock = cfg.data.scoreboard.desBlock
-sb_killMob = cfg.data.scoreboard.killMob
-probability = cfg.config.probability
-allow_animal = cfg.config.allow_animal
+local cfg = json.decode(tool:ReadAllText('./ilua/saReward/config.json'))
+local mu_desBlock = cfg.data.multiple.desBlock
+local mu_killMob = cfg.data.multiple.killMob
+local sb_desBlock = cfg.data.scoreboard.desBlock
+local sb_killMob = cfg.data.scoreboard.killMob
+local probability = cfg.config.probability
+local allow_animal = cfg.config.allow_animal
 -- Others
-probability = probability * 100
+local probability = probability * 100
 -- 功能函数
 function desBlock(b)
     math.randomseed(os.time())
@@ -35,10 +35,7 @@ end
 function killMob(c)
     math.randomseed(os.time())
     if (math.random(1, 100) <= probability) then
-        uuid = luaapi:GetUUID(c.srcname)
-        if (uuid ~= nil) then
-            mc:runcmd('scoreboard players add "' .. c.srcname .. '" ' .. sb_killMob .. ' ' .. tostring(mu_killMob))
-        end
+		if(c.srcname~='') then mc:runcmd('scoreboard players add "' .. c.srcname .. '" ' .. sb_killMob .. ' ' .. tostring(mu_killMob)) end
     end
 end
 -- 注册监听

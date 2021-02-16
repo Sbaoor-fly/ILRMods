@@ -4,7 +4,7 @@
 -------- STAND WITH OPEN SOURCE --------
 ----------------------------------------
 -- 插件版本，请勿修改
-plugin_version = '1.0.0'
+local plugin_version = '1.0.1'
 -- 载入库
 if (tool:IfFile('./ilua/lib/json.lua') == false) then
     print('[optCtl] Where is my json library??!!')
@@ -16,7 +16,7 @@ if (tool:IfFile('./ilua/optCtl/config.json') == false) then
     print('[optCtl] Where is my config file??!!]')
     return false
 end
-list = json.decode(tool:ReadAllText('./ilua/optCtl/config.json'))
+local list = json.decode(tool:ReadAllText('./ilua/optCtl/config.json'))
 -- 功能函数
 function cleanOutput(a)
     opt = a.output
