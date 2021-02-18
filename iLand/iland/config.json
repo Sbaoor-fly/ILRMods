@@ -1,19 +1,21 @@
 {
   "scoreboard": {
-    "name": "money",
-	"credit_name": "金币"
+    "credit_name": "金币",
+    "name": "money"
+  },
+  "land": {
+    "land_min_square": 4,
+    "land_max_square": 2000,
+    "player_max_lands": 5
   },
   "land_buy": {
     "price_ground": 10,
-    "price_sky": 2,
-	"refund_rate": 0.9
-  },
-  "land": {
-    "player_max_lands": 5,
-    "land_max_square": 2000,
-	"land_min_square": 4
+    "refund_rate": 0.9,
+    "price_sky": 2
   },
   "manager": {
+    "operator": [],
     "allow_op_delete_land": true
-  }
+  },
+  "version": 103
 }
