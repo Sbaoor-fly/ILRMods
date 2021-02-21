@@ -4,7 +4,7 @@
 -------【 交流QQ群：819566672 】--------
 ----------------------------------------
 -- 插件版本，请勿修改
-local plugin_version = '1.0.5'
+local plugin_version = '1.0.6'
 -- 初始化变量
 local beingNewLand_lic = {}
 local beingNewLand_posA = {}
@@ -23,6 +23,10 @@ if (tool:IfFile('./ilua/iland/config.json') == false) then
     print('[iLand] Where is my config file??!!')
     return false
 end
+if (tool:IfFile('./ilua/xuiddb.net.lua') == false) then
+    print('[iLand] Where is my depend plugin(xuiddb)??!!')
+    return false
+end
 local json = require('./ilua/lib/json')
 -- Encode Json File
 cfg = json.decode(tool:ReadAllText('./ilua/iland/config.json'))
@@ -34,8 +38,23 @@ do --update configure file
 		cfg.manager.operator={}
 		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\config.json',json.encode(cfg))
 	end
+	if(cfg.version==103) then
+		cfg.version=106
+		cfg.manager.allow_op_delete_land=nil
+		for landId, val in pairs(land_data) do
+			if(land_data[landId].range==nil) then
+				land_data[landId]=nil
+			end
+		end
+		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\config.json',json.encode(cfg))
+		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\data.json',json.encode(land_data))
+	end
 end
 -- Functions
+function Event_PlayerMove(a)
+	TRS_Form[a.playername].nowpos=a.XYZ
+	TRS_Form[a.playername].nowdim=a.dimensionid
+end
 function Event_PlayerJoin(a)
 	TRS_Form[a.playername]={}
 end
@@ -120,13 +139,12 @@ function Monitor_FormArrived(a)
 		land_data[lid].setting.allow_use_item=result[8]
 		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\data.json',json.encode(land_data))
 		mc:runcmd('title "' .. a.playername .. '" actionbar 成功')
-		return
 	end
 	--- Del Land ---
 	if(TRS_Form[a.playername].delland==a.formid) then
 		mc:runcmd('scoreboard players add "' .. a.playername .. '" ' .. cfg.scoreboard.name .. ' ' .. TRS_Form[a.playername].landvalue)
-		land_data[TRS_Form[a.playername].landid]={}
-		table.remove(land_owners[xuid],isValInList(land_owners[xuid],TRS_Form[a.playername].landid))
+		land_data[lid]=nil
+		table.remove(land_owners[xuid],isValInList(land_owners[xuid],lid))
 		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\data.json',json.encode(land_data))
 		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\owners.json',json.encode(land_owners))
 		mc:runcmd('title "' .. a.playername .. '" actionbar 成功')
@@ -151,12 +169,33 @@ function Monitor_FormArrived(a)
 			mc:runcmd('title "' .. a.playername .. '" actionbar 成功')
 		end
 		if(result[4]==true) then
-			if(#land_data[TRS_Form[a.playername].landid].setting.share==0) then return end 
-			local x=land_data[TRS_Form[a.playername].landid].setting.share[result[5]+1]
+			if(#land_data[lid].setting.share==0) then return end 
+			local x=land_data[lid].setting.share[result[5]+1]
 			table.remove(land_data[lid].setting.share,isValInList(land_data[lid].setting.share,x))
 			tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\data.json',json.encode(land_data))
 			mc:runcmd('title "' .. a.playername .. '" actionbar 成功')
 		end
+	end
+	--- Land Tag ---
+	if(TRS_Form[a.playername].ltag==a.formid) then
+		local result=json.decode(a.selected)
+		if(string.find(result[2],'"',1)~=nil or string.find(result[2],'\\',1)~=nil or string.find(result[2],',',1)~=nil) then --防止有nt玩家搞事
+			mc:runcmd('title "' .. a.playername .. '" actionbar NMSL')
+			return
+		end
+		local btag=string.find(lid,'_')
+		local wdnmd=lid
+		if(btag~=nil) then
+			wdnmd=string.sub(lid,0,btag-1)
+		end
+		local tag=wdnmd..'_'..result[2]
+		land_data[tag]=deepcopy(land_data[lid])
+		land_data[lid]=nil
+		table.insert(land_owners[xuid],#land_owners[xuid]+1,tag)
+		table.remove(land_owners[xuid],isValInList(land_owners[xuid],lid))
+		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\data.json',json.encode(land_data))
+		tool:WriteAllText(tool:WorkingPath()..'ilua\\iland\\owners.json',json.encode(land_owners))
+		mc:runcmd('title "' .. a.playername .. '" actionbar 成功')
 	end
 end
 function Func_Buy_giveup(playername)
@@ -177,6 +216,7 @@ end
 function Func_Buy_createOrder(playername)
     local f = isValInList(beingNewLand_lic, playername) --用玩家名获取索引
     local uuid = luaapi:GetUUID(playername)
+	local xuid = luaapi:GetXUID(playername)
     if (beingNewLand_nowMode[f] ~= 2) then
         mc:runcmd('title "' .. playername .. '" actionbar 购买失败！请按步骤圈地！')
         return
@@ -187,12 +227,12 @@ function Func_Buy_createOrder(playername)
     local vol = length * width * height
     local squ = length * width
 	--- 违规圈地判断
-	if(squ>cfg.land.land_max_square) then
+	if(squ>cfg.land.land_max_square and isValInList(cfg.manager.operator,xuid)==-1) then
 		mc:runcmd('title "' .. playername .. '" actionbar 所圈领地太大，请重新圈地。\n请使用“/land a”选择第一个点')
 		beingNewLand_nowMode[f]=0
 		return
 	end
-	if(squ<cfg.land.land_min_square) then
+	if(squ<cfg.land.land_min_square and isValInList(cfg.manager.operator,xuid)==-1) then
 		mc:runcmd('title "' .. playername .. '" actionbar 所圈领地太小，请重新圈地。\n请使用“/land a”选择第一个点')
 		beingNewLand_nowMode[f]=0
 		return
@@ -282,7 +322,7 @@ function Func_Buy_getLicense(playername)
         mc:runcmd('title "' .. playername .. '" actionbar 请勿重复请求!!\n请使用“/land a”选定第一个点')
         return
     end
-	if(land_owners[luaapi:GetXUID(playername)]~=nil) then
+	if(land_owners[luaapi:GetXUID(playername)]~=nil and isValInList(cfg.manager.operator,luaapi:GetXUID(playername))==-1) then
 		if(#land_owners[luaapi:GetXUID(playername)]>cfg.land.player_max_lands) then
 			mc:runcmd('title "' .. playername .. '" actionbar 你想当地主是吧，无产阶级是不能有这么多地的。')
 			return
@@ -356,6 +396,11 @@ end
 function Func_Manager_open(playername)
 	local uuid=luaapi:GetUUID(playername)
 	local xuid=luaapi:GetXUID(playername)
+	local welcome='Welcome to use Land Manager.'
+	lid=Func_GetlandFromPos(TRS_Form[playername].nowpos,TRS_Form[playername].nowdim)
+	if(lid~=-1) then
+		welcome=welcome..'\n您现在正在: §l'..lid..' §r上'
+	end
 	if(land_owners[xuid]~=nil) then
 		if(#land_owners[xuid]==0) then
 			mc:runcmd('title "' .. playername .. '" actionbar 你还没有领地哦，使用“/land new”开始创建一个吧！')
@@ -365,10 +410,9 @@ function Func_Manager_open(playername)
 		mc:runcmd('title "' .. playername .. '" actionbar 你还没有领地哦，使用“/land new”开始创建一个吧！')
 		return
 	end
-	TRS_Form[playername].mgr = mc:sendCustomForm(uuid,'{"content":[{"type":"label","text":"Welcome to use Land Manager."},{"default":0,"steps":["查看领地信息","编辑领地权限","编辑信任名单","删除领地"],"type":"step_slider","text":"选择要进行的操作"},{"default":0,"options":'..json.encode(land_owners[xuid])..',"type":"dropdown","text":"选择你要管理的领地"}],"type":"custom_form","title":"选择目标领地"}}]}')
+	TRS_Form[playername].mgr = mc:sendCustomForm(uuid,'{"content":[{"type":"label","text":"'..welcome..'"},{"default":0,"steps":["查看领地信息","编辑领地权限","编辑信任名单","编辑领地Tag","删除领地"],"type":"step_slider","text":"选择要进行的操作"},{"default":0,"options":'..json.encode(land_owners[xuid])..',"type":"dropdown","text":"选择你要管理的领地"}],"type":"custom_form","title":"选择目标领地"}}]}')
 end
-function Func_Manager_callback(a,b)
-	if(b=='null') then return end
+function Func_Manager_callback(a,b) --a=playername b=selected
 	local xuid=luaapi:GetXUID(a)
 	local uuid=luaapi:GetUUID(a)
 	local result=json.decode(b)
@@ -396,7 +440,10 @@ function Func_Manager_callback(a,b)
 		end
 		TRS_Form[a].ltrust=mc:sendCustomForm(uuid,'{"content":[{"type":"label","text":"打开欲操作项的开关，完成后提交。"},{"default":false,"type":"toggle","text":"添加受信任玩家\n受信任玩家将拥有所有领地权限，但不能进行权限编辑或删除领地。"},{"type":"dropdown","text":"选择一个玩家","default":0,"options":'..json.encode(TRS_Form[a].online)..'},{"default":false,"type":"toggle","text":"删除受信任玩家"},{"type":"dropdown","text":"选择一个玩家","default":0,"options":'..json.encode(d)..'}],"type":"custom_form","title":"Land Trust"}')
 	end
-	if(result[2]==3) then --删除领地
+	if(result[2]==3) then --领地tag
+		TRS_Form[a].ltag=mc:sendCustomForm(uuid,'{"content":[{"type":"label","text":"领地Tag有助于您区分多个领地，而不改变原有的领地配置"},{"placeholder":"tag here","default":"","type":"input","text":""}],"type":"custom_form","title":"Land Tag"}')
+	end
+	if(result[2]==4) then --删除领地
 		local height = math.abs(land_data[TRS_Form[a].landid].range.start_y - land_data[TRS_Form[a].landid].range.end_y)
 		local squ = math.abs(land_data[TRS_Form[a].landid].range.start_x - land_data[TRS_Form[a].landid].range.end_x) * math.abs(land_data[TRS_Form[a].landid].range.start_z - land_data[TRS_Form[a].landid].range.end_z)
 		TRS_Form[a].landvalue=math.floor((squ * cfg.land_buy.price_ground + height * cfg.land_buy.price_sky)*cfg.land_buy.refund_rate)
@@ -570,11 +617,26 @@ function isValInList(list, value)
     end
     return -1
 end
+function deepcopy(orig) --参(chao)考(xi)自lua-users.org
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
 -- 注册监听
 luaapi:Listen('onInputCommand', Monitor_CommandArrived)
 luaapi:Listen('onFormSelect', Monitor_FormArrived)
 luaapi:Listen('onLoadName', Event_PlayerJoin)
 luaapi:Listen('onPlayerLeft', Event_PlayerLeft)
+luaapi:Listen('onMove',Event_PlayerMove)
 luaapi:Listen('onDestroyBlock',onDestroyBlock)
 luaapi:Listen('onAttack',onAttack)
 luaapi:Listen('onUseItem',onUseItem)
