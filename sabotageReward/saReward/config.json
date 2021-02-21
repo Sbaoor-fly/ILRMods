@@ -1,16 +1,28 @@
 {
+  "version": 106,
+  "config": {
+	"kill": {
+	  "reward_list": false,
+	  "probability": 0.8
+	},
+	"destroy": {
+	  "reward_list": false,
+	  "probability": 0.8
+	},
+	"debug_mode": false
+  },
   "data": {
+    "reward_list": {
+	  "kill": ["entity.creeper.name"],
+	  "destroy": [1,2,3,4,5]
+	},
     "multiple": {
-      "desBlock": 1,
-      "killMob": 1
+      "kill": [1,10],
+      "destroy": [5,15]
     },
     "scoreboard": {
-      "desBlock": "breakblock",
-      "killMob": "killmobs"
+      "kill": "money",
+      "destroy": "money"
     }
-  },
-  "config": {
-    "allow_animal": true,
-    "probability": 0.5
   }
 }
