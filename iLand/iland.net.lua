@@ -3,7 +3,7 @@
 --       未经许可 禁止盈利性用途      --
 ----------------------------------------
 -- 插件版本，请勿修改
-local plugin_version = '1.0.8'
+local plugin_version = '1.0.9'
 local latest_version = plugin_version
 local newLand = {}
 local TRS_Form={}
@@ -19,6 +19,11 @@ end
 if (tool:IfFile('./ilua/xuiddb.net.lua') == false) then
     print('[ILand] Where is my depending plugin(xuiddb)??!!')
     return false
+end
+if (tool:IfFile('./py/iLand_Enhance.py') == true) then
+    print('[ILand] BDSpyrunner Enhance founded!')
+else
+	print('[ILand] BDSpyrunner Enhance not found!')
 end
 local json = require('./ilua/lib/json')
 -- Encode Json File
@@ -537,6 +542,7 @@ function onUseItem(e)
 	if(isValInList(cfg.manager.operator,xuid)~=-1) then return end --manager
 	if(land_owners[xuid]~=nil and isValInList(land_owners[xuid],lid)~=-1) then return end --主人
 	if(isValInList(land_data[lid].setting.share,xuid)~=-1) then return end --信任
+	if(e.blockname=='minecraft:barrel') then return end --sbmojang
 	return false
 end
 function onPlacedBlock(e)
@@ -584,6 +590,16 @@ function onDropItem(e)
 	if(land_owners[xuid]~=nil and isValInList(land_owners[xuid],lid)~=-1) then return end --主人
 	if(isValInList(land_data[lid].setting.share,xuid)~=-1) then return end --信任
 	return false
+end
+function onStartOpenBarrel(e)
+	local lid=getLandFromPos(e.XYZ,e.dimensionid)
+	local xuid=luaapi:GetXUID(e.playername)
+	if(lid==-1) then return end
+	if(land_data[lid].setting.allow_open_barrel==true) then return end --权限允许
+	if(isValInList(cfg.manager.operator,xuid)~=-1) then return end --manager
+	if(land_owners[xuid]~=nil and isValInList(land_owners[xuid],lid)~=-1) then return end --主人
+	if(isValInList(land_data[lid].setting.share,xuid)~=-1) then return end --信任
+	mc:disconnectClient(luaapi:GetUUID(e.playername),'你再开个试试？')-- 妈的，干就完了
 end
 -- 拓展功能函数
 function getLandFromPos(pos,dim)
@@ -713,6 +729,7 @@ luaapi:Listen('onLevelExplode',onLevelExplode)
 luaapi:Listen('onStartOpenChest',onStartOpenChest)
 luaapi:Listen('onDropItem',onDropItem)
 luaapi:Listen('onPickUpItem',onPickUpItem)
+luaapi:Listen('onStartOpenBarrel',onStartOpenBarrel)
 mc:setCommandDescribe('land', '领地系统主命令')
 mc:setCommandDescribe('land new', '创建一个新领地')
 mc:setCommandDescribe('land giveup', '放弃没有创建完成的领地')
